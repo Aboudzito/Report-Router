@@ -1,0 +1,318 @@
+{
+  "name": "Route Router",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "97f372f5-0d85-429e-8bf0-8ae2c8bfb149",
+      "name": "Telegram Trigger",
+      "webhookId": "0e1dd5c6-a230-4a60-bbd2-529669401c95",
+      "credentials": {
+        "telegramApi": {
+          "id": "TFyWKYmuiZNEAT7e",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6046821f-1aaf-4f4d-9d45-0ea7916eae28",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "df75aee6-2f70-4622-9509-2bc2454afd58",
+              "leftValue": "={{ $json.message.document.mime_type }}",
+              "rightValue": "application/pdf",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e4a82421-39b0-4971-802a-56fef9806d84",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        624,
+        224
+      ],
+      "id": "acccb7b7-b457-4494-b7dc-9ca28e3e3424",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "g1p4kWWqYhKR6lvH",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1f3f8ebb-1ee3-4fc0-951b-f1356f55fd74",
+              "leftValue": "={{ $json.output.result_status }}",
+              "rightValue": "Passed",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        0
+      ],
+      "id": "b6e02eba-1ba6-4bb7-bf1f-de47bd9274cd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "sendTo": "abed.aly.habib.6772@gmail.com",
+        "subject": "=Official Results: {{ $json.output.course_name }}",
+        "emailType": "text",
+        "message": "=Hello {{ $json.output.Student_name }},  Your exam results for {{ $json.output.course_name }} have been processed. Final Grade: {{ $json.output.final_grade }}/100 Status: {{ $json.output.result_status }}  Best regards, Academic Department",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        -96
+      ],
+      "id": "d09a9bae-1b35-4307-9aae-7a15a4c6c726",
+      "name": "Send a message",
+      "webhookId": "5d1433cc-275f-4829-9984-ae2d6282e115",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "88zizFuJdur3MhwR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "abed.aly.habib.6772@gmail.com",
+        "subject": "=Official Results: {{ $('Information Extractor').item.json.output.course_name }}(Action Required)",
+        "emailType": "text",
+        "message": "=Hello {{ $json.output.student_name }},\n\nYour exam results for {{ $json.output.course_name }} have been processed.\nFinal Grade: {{ $json.output.final_grade }}/100\nStatus: {{ $json.output.result_status }}\n\nUnfortunately, you did not meet the passing grade requirement for this examination. Please reach out to the academic department for remediation and makeup options.\n\nBest regards,\nAcademic Department",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        112
+      ],
+      "id": "838e5a08-88bd-4ace-98ca-7d9d69b4f04a",
+      "name": "Send a message1",
+      "webhookId": "692a57a2-0b69-401f-9df3-b2758c9af119",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "88zizFuJdur3MhwR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Student_name",
+              "description": "Unique student ID code",
+              "required": true
+            },
+            {
+              "name": "student_id",
+              "description": "student_id",
+              "required": true
+            },
+            {
+              "name": "course_name",
+              "description": "Title of the course or examination",
+              "required": true
+            },
+            {
+              "name": "final_grade",
+              "type": "number",
+              "description": "Numeric final grade score out of 100",
+              "required": true
+            },
+            {
+              "name": "result_status",
+              "description": "Must be strictly Passed or Failed",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "796f0be3-517a-4d8c-b5c8-65b6903523c3",
+      "name": "Information Extractor"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f7974d69-143b-40ab-a6a0-900eb248a6e0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7d357400243297b13770c2530bc16c1484ad51bdf905f0386ec036deb2b7a465"
+  },
+  "id": "ggjgl0LcBUZCCZDd",
+  "tags": []
+}
